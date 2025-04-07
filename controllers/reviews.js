@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("../middleware/verify-token.js");
-// const User = require("../models/user.js");
 const Movie = require("../models/movie.js"); //TMDb API
 const Review = require("../models/review.js");
 
@@ -21,21 +20,24 @@ router.get('/reviews/new', verifyToken ,async (req, res) => {
 });
 
 
-
 //EDIT
 // PUT /users/:userId/reviews/:reviewId
 // This route will allow the user to edit their reviews
 router.put('/reviews/:reviewId', verifyToken ,async (req, res) => {
   try {
     const currentReview = await Review.findById(req.params.reviewId);
-    const updateReview = await currentReview.findByIdAndUpdate(
+    const review = await currentReview.findByIdAndUpdate(
       req.params.reviewId,
       req.body,
       { new: true }
     );
 
-    res.status(201).json(updateReview);
-    res.send("Create new Review Comment");
+    // ensures the current user is the author of the comment
+    if (review.userId.toString() !== req.user._id) {
+      return res
+        .status(403)
+        .json({ message: 'You are not authorized to edit this comment' });
+    }
     
   } catch (error) {
     console.log(error);
@@ -48,18 +50,18 @@ router.put('/reviews/:reviewId', verifyToken ,async (req, res) => {
 // THis route will  allow the user to delete their reviews
 router.delete('/review/:reviewId', verifyToken, async (req, res) => {
   try {
-    const currentReview = await Review.findById(req.params.hootId);
-    const review = currentReview.text.id(req.params.reviewId);
+    const currentReview = await Review.findById(req.params.reviewId);
+    const review = currentReview.text.id(req.params.reviewId); //the Id comes from monggose
 
     // ensures the current user is the author of the comment
-    if (comment.author.toString() !== req.user._id) {
+    if (review.userId.toString() !== req.user._id) {
       return res
         .status(403)
         .json({ message: 'You are not authorized to edit this comment' });
     }
 
     review.text.remove({ _id: req.params.reviewId });
-    await hoot.save();
+    await review.save();
     res.status(200).json({ message: 'Comment deleted successfully' });
   } catch (err) {
     res.status(500).json({ err: err.message });

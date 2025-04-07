@@ -11,6 +11,7 @@ const favoritesRouter = require('./controllers/favorites');
 
 const moviesRouter = require("./controllers/movies")
 const homeRouter = require("./controllers/homepage");
+const reviewsRouter = require('./controllers/reviews');
 const verifyToken = require('./middleware/verify-token');
 
 dotenv.config();
@@ -32,7 +33,8 @@ app.use('/users', verifyToken, usersRouter);
 app.use('/favorites', favoritesRouter);
 app.use('/test-jwt', testJwtRouter);
 app.use('/homepage', homeRouter);
-
+app.use('/movies', moviesRouter);
+app.use('/routers', reviewsRouter);
 
 app.listen(3000, () => {
     console.log('The express app is ready!');

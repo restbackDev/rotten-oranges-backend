@@ -7,6 +7,8 @@ const logger = require('morgan');
 const testJwtRouter = require('./controllers/test-jwt');
 const authRouter = require('./controllers/auth');
 const usersRouter = require('./controllers/users');
+const favoritesRouter = require('./controllers/favorites');
+
 const homeRouter = require("./controllers/homepage.js");
 
 const verifyToken = require('./middleware/verify-token');
@@ -27,6 +29,7 @@ app.use(logger('dev'));
 
 app.use('/auth', authRouter);
 app.use('/users', verifyToken, usersRouter);
+app.use('/favorites', favoritesRouter);
 app.use('/test-jwt', testJwtRouter);
 app.use('/homepage', homeRouter);
 

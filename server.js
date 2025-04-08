@@ -34,7 +34,7 @@ app.use('/favorites', favoritesRouter);
 app.use('/test-jwt', testJwtRouter);
 app.use('/homepage', homeRouter);
 app.use('/movies', moviesRouter);
-app.use('/routers', reviewsRouter);
+app.use('/reviews', reviewsRouter);
 
 app.listen(3000, () => {
     console.log('The express app is ready!');

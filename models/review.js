@@ -22,6 +22,8 @@ const reviewSchema = new mongoose.Schema({
     },
 }, { timestamps: true }); // adds createdAt and updatedAt automatically
 
+// Ensure that a user can only leave one review per movie (composite unique index)
+reviewSchema.index({ userId: 1, movieId: 1 }, { unique: true });
 
 reviewSchema.set('toJSON', {
     transform: (document, returnedObject) => {

@@ -3,100 +3,88 @@ const router = express.Router();
 const verifyToken = require("../middleware/verify-token.js");
 const Review = require("../models/review.js");
 
-// michelle??
-// GET /users/:userId/reviews/new
-// This route will display an Edit Form where the user can Review comment about the Movie
-router.get('/reviews/new', verifyToken ,async (req, res) => {
-  try {
-    const currentReview = await Review.create(req.body);
-    res.status(201).json(currentReview);
-    res.send("Create new Review Comment");
-    
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error.message });
-    // res.redirect('/'); //uncomment once the frontend is up
-  }
-});
-
-// POST /reviews/:movieId
-// This route allows a user to create a review for a specific movie
+// Create a review for a movie (user can only review once)
 router.post('/:movieId', verifyToken, async (req, res) => {
   try {
-    const { text } = req.body;
-    if (!text) {
-      return res.status(400).json({ error: 'Review text is required' });
+    const { text, rating } = req.body;
+    const movieId = req.params.movieId;
+
+    if (!text || rating == null) {
+      return res.status(400).json({ error: 'Review text and rating are required' });
     }
 
-    // Create a new review for the movie
-    const newReview = new Review({
-      movieId: req.params.movieId,
-      userId: req.user._id,  // The current user making the review
-      text
-    });
+    if (rating < 0 || rating > 10) {
+      return res.status(400).json({ error: 'Rating must be between 0 and 10' });
+    }
 
+    const existingReview = await Review.findOne({ userId: req.user._id, movieId });
+    if (existingReview) {
+      return res.status(400).json({ error: 'You have already reviewed this movie.' });
+    }
+
+    const newReview = new Review({ movieId, userId: req.user._id, text, rating });
     await newReview.save();
-    res.status(201).json(newReview); // Return the newly created review
+
+    res.status(201).json(newReview);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: 'Error creating review' });
   }
 });
 
-
-//EDIT
-// PUT /users/:userId/reviews/:reviewId
-// PUT /reviews/:reviewId MICHELLE
-// This route will allow the user to edit their reviews
-router.put('/:reviewId', verifyToken ,async (req, res) => {
+// update a user's review for a specific movie
+router.put('/:movieId', verifyToken, async (req, res) => {
   try {
-    const currentReview = await Review.findById(req.params.reviewId);
-    if (!currentReview) {
-      return res.status(404).json({ error: 'Review not found' });
-    }
-    const review = await currentReview.findByIdAndUpdate(
-      req.params.reviewId,
-      req.body,
-      { new: true }
-    );
+    const { text, rating } = req.body;
+    const movieId = req.params.movieId;
 
-    // ensures the current user is the author of the comment
-    if (review.userId.toString() !== req.user._id) {
-      return res
-        .status(403)
-        .json({ message: 'You are not authorized to edit this comment' });
+    const review = await Review.findOne({ movieId, userId: req.user._id });
+    if (!review) {
+      return res.status(404).json({ error: 'Review not found or you do not have permission to update it' });
     }
-    
+
+    review.text = text ?? review.text;
+    review.rating = rating ?? review.rating;
+
+    await review.save();
+    res.status(200).json(review);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error.message });
-    // res.redirect('/'); //uncomment once the frontend is up
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update review' });
   }
 });
 
-// DELETE /reviews/:reviewId MICHELLE
-// DELETE /users/:userId/reviews/:reviewId
-// THis route will  allow the user to delete their reviews
-router.delete('/:reviewId', verifyToken, async (req, res) => {
+// Delete a user's review for a specific movie
+router.delete('/:movieId', verifyToken, async (req, res) => {
   try {
-    const currentReview = await Review.findById(req.params.reviewId);
-    if (!currentReview) {
+    const movieId = req.params.movieId;
+
+    const review = await Review.findOneAndDelete({ movieId, userId: req.user._id });
+    if (!review) {
+      return res.status(404).json({ error: 'Review not found or you do not have permission to delete it' });
+    }
+
+    res.status(200).json({ message: 'Review deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete review' });
+  }
+});
+
+// Get the current user's review for a movie (used in MovieDetail)
+router.get('/:movieId', verifyToken, async (req, res) => {
+  try {
+    const movieId = req.params.movieId;
+
+    const review = await Review.findOne({ movieId, userId: req.user._id });
+    if (!review) {
       return res.status(404).json({ error: 'Review not found' });
     }
-    const review = currentReview.text.id(req.params.reviewId); //the Id comes from monggose
 
-    // ensures the current user is the author of the comment
-    if (review.userId.toString() !== req.user._id) {
-      return res
-        .status(403)
-        .json({ message: 'You are not authorized to edit this comment' });
-    }
-
-    review.text.remove({ _id: req.params.reviewId });
-    await review.save();
-    res.status(200).json({ message: 'Comment deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ err: err.message });
+    res.status(200).json(review);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to get review' });
   }
 });
 

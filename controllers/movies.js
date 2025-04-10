@@ -6,6 +6,7 @@ const Review = require("../models/review.js");
 const { fetchAndSavePopularMovies } = require("../services/movieService");
 
 const dotenv = require("dotenv");
+const fetch = require("node-fetch");
 
 dotenv.config();
 // console.log('TMDB API KEY:', process.env.TMDB_API_KEY); // DELETE LATER
@@ -17,12 +18,37 @@ router.get("/discover", verifyToken, async (req, res) => {
     // Fetch and save the popular movies
     await fetchAndSavePopularMovies();
 
-    // Return the list of movies from the database
+    // Returns the list of movies from the database
     const movies = await Movie.find({});
     res.status(200).json(movies);
   } catch (error) {
     console.error("Error in fetching or saving movies:", error);
     res.status(500).json({ error: "Error fetching movies from TMDb" });
+  }
+});
+
+// POST /movies/:movieId/reviews - Creates a review for a movie
+router.post("/:movieId/reviews", verifyToken, async (req, res) => {
+  try {
+    const review = new Review({
+      movieId: req.params.movieId,
+      userId: req.user._id, // 
+      text: req.body.text,
+    });
+    await review.save();
+    res.status(201).json(review);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/:movieId/reviews", verifyToken, async (req, res) => {
+  try {
+    const reviews = await Review.find({ movieId: req.params.movieId });
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -39,18 +65,31 @@ router.get("/:movieId", verifyToken, async (req, res) => {
       console.log(error)
       res.status(500).json({ error: error.message });
     }
-  });
+});
 
-//POST /users/:userId/movies/:movieId
-// This route will post any updated changes in the movie page
-router.post ("/:movieId", verifyToken, async (req,res) => {
+router.get("/:movieId/watch-providers", verifyToken, async (req, res) => {
   try {
-    const currentReview = await Review.findById(req.params.movieId)
-    currentReview.text.push(req.body) // pushed the new/updated review comment
-    await currentReview.save(); //saves the new/updated review comment
+    const movieId = req.params.movieId;
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/watch/providers`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${process.env.TMDB_BEARER_TOKEN}`,
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`TMDb API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.status(200).json(data);
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ error: error.message });
+    console.error("Error fetching watch providers:", error.message);
+    res.status(500).json({ error: "Failed to fetch watch providers" });
   }
 });
 

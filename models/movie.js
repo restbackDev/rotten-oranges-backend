@@ -12,7 +12,7 @@ const movieSchema = new mongoose.Schema({
   runtime: Number, // Added this new field Gnale
   genreIds: [Number], 
   genreNames: [String], 
-  backdropPath: String, // Added this new field Gnale
+  backdropPath: String, 
   cast: [
     {
       _id: Number,
@@ -20,11 +20,12 @@ const movieSchema = new mongoose.Schema({
       character: String,
       profilePath: String,
     },
-  ], // Added this new field as an array of cast members Gnale
+  ], 
 },
 {
   timestamps: true,
 });
+
 
 
 module.exports = mongoose.model('Movie', movieSchema);

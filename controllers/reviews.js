@@ -3,6 +3,17 @@ const router = express.Router();
 const verifyToken = require("../middleware/verify-token.js");
 const Review = require("../models/review.js");
 
+//Gnale- This is get all of the reviews made by the user
+//GET / reviews/my-reviews
+router.get("/my-reviews", verifyToken, async (req, res) => {
+  try {
+    const userReviews = await Review.find({ userId: req.user._id });
+    res.status(200).json(userReviews);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Create a review for a movie (user can only review once)
 router.post('/:movieId', verifyToken, async (req, res) => {
   try {

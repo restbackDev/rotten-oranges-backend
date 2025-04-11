@@ -9,7 +9,6 @@ const dotenv = require("dotenv");
 const fetch = require("node-fetch");
 
 dotenv.config();
-// console.log('TMDB API KEY:', process.env.TMDB_API_KEY); // DELETE LATER
 
 // Fetch movie details from TMDb API and save it to DB
 // Fetch popular movies from TMDb and save to DB (controller)

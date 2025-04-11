@@ -30,7 +30,7 @@ You can access the deployed link here: [Deployment Link](https://67f8a72b31f5286
  ```bash
 MONGODB_URI=your_MONGODB_URI
 JWT_SECRET=your_JWT_SECRET
-TMDB_BEARER_TOKEN=your_TMDB_BEARER_TOKEN
+TMDB_API_KEY=your_api_key
    ```
 
 5. Start the server:

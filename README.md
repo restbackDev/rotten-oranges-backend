@@ -50,8 +50,10 @@ TMDB_BEARER_TOKEN=your_TMDB_BEARER_TOKEN
 - **Deployment:** Heroku
 
 ## Planning 
-- [Trello](https://trello.com/b/OotijSIg/rottenoranges)
+- [Trello Board](https://trello.com/b/OotijSIg/rottenoranges)
 
+
+![Rotten Oranges Dashboard Page](https://github.com/restbackDev/rotten-oranges-frontend/blob/Develop/public/images/readme/rottenorangedashboard.png?raw=true)
 ## Next Steps
 
 - **Profile Management:** Develop endpoints and frontend components to allow users to manage their profiles, including updating personal information.

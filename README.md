@@ -38,7 +38,7 @@ TMDB_API_KEY=your_api_key
    nodemon servers.js
    ```
 
-   The API will be available at `http://localhost:000`.
+   The API will be available at `http://localhost:3000`.
 
 ## Tech Stack
 - **Frontend:** React (Vite), CSS Flexbox and Grid (For responsive and flexible layout designs).

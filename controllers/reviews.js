@@ -3,8 +3,6 @@ const router = express.Router();
 const verifyToken = require("../middleware/verify-token.js");
 const Review = require("../models/review.js");
 
-
-//Gnale- This is get all of the reviews made by the user
 //GET / reviews/my-reviews
 router.get("/my-reviews", verifyToken, async (req, res) => {
   try {
@@ -15,7 +13,6 @@ router.get("/my-reviews", verifyToken, async (req, res) => {
   }
 });
 
-// michelle??
 // GET /users/:userId/reviews/new
 // This route will display an Edit Form where the user can Review comment about the Movie
 router.get("/movies/:movieId/reviews", async (req, res) => {
